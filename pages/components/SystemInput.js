@@ -103,23 +103,36 @@ function SystemInput(){
        } 
    
        const sendMessage = async () => {
-        const url = 'http://127.0.0.1:5328/api/chatbot';
-        const data = { message:message , collection : collectionName };
-        console.log(data);
-        const response = await fetch(url, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(data),
-        });
-        const jsonResponse = await response.json();
-        setResponse(jsonResponse.response);
-        await addDoc(collection(db, 'chat'),{
-          user : message,
-          system : jsonResponse,
-          email: session?.user?.email,
-          timestamp: serverTimestamp(),     
-      });
-      };
+        try {
+            const url =  ' http://127.0.0.1:8000/api/chatbot';
+            const data = { message: message, collection: collectionName };
+            console.log("Sending message to server:", data);
+
+            const response = await fetch(url, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(data),
+            });
+
+            if (!response.ok) {
+                throw new Error(`HTTP error! Status: ${response.status}`);
+            }
+
+            const jsonResponse = await response.json();
+            console.log("Server response:", jsonResponse);
+            setResponse(jsonResponse.response);
+
+            await addDoc(collection(db, 'chat'), {
+                user: message,
+                system: jsonResponse.response,
+                email: session?.user?.email,
+                timestamp: serverTimestamp(),
+            });
+        } catch (error) {
+            console.error("Error sending message:", error);
+        }
+    };
+
        const handleCancel = () => {
     console.log('Clicked cancel button');
     setOpen(false);
@@ -215,7 +228,7 @@ function SystemInput(){
                  placeholder="chat"
                  />
              </form>
-             <div   >
+             <div>
              <PaperAirplaneIcon onClick={sendMessage} 
                className="h-6 w-6 navbtn" />
                </div>
