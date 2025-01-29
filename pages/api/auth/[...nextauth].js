@@ -24,7 +24,8 @@ export const authOptions = {
       session.accessToken = token.accessToken
       return session
     }
-  }
+  },
+  secret: process.env.JWT_SECRET
 };
   export default NextAuth(authOptions)
   
