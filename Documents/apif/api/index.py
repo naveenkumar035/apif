@@ -2,6 +2,8 @@ from flask import Flask, request, jsonify, make_response
 from flask_cors import CORS
 import firebase_admin
 from firebase_admin import credentials, firestore
+from werkzeug.middleware.dispatcher import DispatcherMiddleware
+from werkzeug.wrappers import Response
 
 # Initialize Flask app
 app = Flask(__name__)
@@ -79,6 +81,11 @@ def handle_options_request():
         response.headers.add("Access-Control-Allow-Headers", "Content-Type")
         response.headers.add("Access-Control-Allow-Methods", "POST, GET, OPTIONS")
         return response
+    
+def handler(environ, start_response):
+    return DispatcherMiddleware(Response("Not Found", status=404), {
+        "/api": app
+    })(environ, start_response)
 
 if __name__ == '__main__':
     app.run(debug=True)
